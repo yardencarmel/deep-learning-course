@@ -5,8 +5,8 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 import matplotlib.pyplot as plt
-import numpy as np
 import os
+from pathlib import Path
 from tqdm import tqdm
 
 # Set device
@@ -20,10 +20,16 @@ NUM_EPOCHS = 30
 DROPOUT_RATE = 0.5
 WEIGHT_DECAY = 1e-4
 
+# Base paths (relative to current working directory)
+PROJECT_ROOT = Path.cwd()
+MODELS_DIR = PROJECT_ROOT / 'hw1' / 'models'
+PLOTS_DIR = PROJECT_ROOT / 'hw1' / 'plots'
+DATA_DIR = PROJECT_ROOT / 'hw1' / 'data'
+RESULTS_FILE = PROJECT_ROOT / 'hw1' / 'results_summary.txt'
+
 # Create directories
-os.makedirs('hw1/models', exist_ok=True)
-os.makedirs('hw1/plots', exist_ok=True)
-os.makedirs('hw1/data', exist_ok=True)
+for directory in (MODELS_DIR, PLOTS_DIR, DATA_DIR):
+    directory.mkdir(parents=True, exist_ok=True)
 
 
 class LeNet5(nn.Module):
@@ -103,14 +109,14 @@ def get_data_loaders():
     ])
 
     train_dataset = datasets.FashionMNIST(
-        root='./data',
+        root=str(DATA_DIR),
         train=True,
         download=True,
         transform=transform
     )
 
     test_dataset = datasets.FashionMNIST(
-        root='./data',
+        root=str(DATA_DIR),
         train=False,
         download=True,
         transform=transform
@@ -232,10 +238,10 @@ def train_model(config_name, use_dropout=False, use_batch_norm=False, use_weight
         # Save best model
         if test_acc > best_test_acc:
             best_test_acc = test_acc
-            torch.save(model.state_dict(), f'models/{config_name}_best.pth')
+            torch.save(model.state_dict(), MODELS_DIR / f'{config_name}_best.pth')
     
     # Save final model
-    torch.save(model.state_dict(), f'models/{config_name}_final.pth')
+    torch.save(model.state_dict(), MODELS_DIR / f'{config_name}_final.pth')
     
     # For dropout models, return train_eval_accs (without dropout) for plotting
     if use_dropout:
@@ -259,9 +265,10 @@ def plot_convergence(config_name, train_accs, test_accs):
     plt.xlim(1, len(epochs))
     plt.ylim(80, 100)
     plt.tight_layout()
-    plt.savefig(f'plots/{config_name}_convergence.png', dpi=300, bbox_inches='tight')
+    output_path = PLOTS_DIR / f'{config_name}_convergence.png'
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
     plt.close()
-    print(f"Saved plot: plots/{config_name}_convergence.png")
+    print(f"Saved plot: {output_path}")
 
 
 def create_summary_table(results):
@@ -278,7 +285,7 @@ def create_summary_table(results):
     print("="*80)
     
     # Save to file
-    with open('results_summary.txt', 'w') as f:
+    with open(RESULTS_FILE, 'w') as f:
         f.write("FINAL ACCURACIES SUMMARY\n")
         f.write("="*80 + "\n")
         f.write(f"{'Configuration':<30} {'Train Accuracy':<20} {'Test Accuracy':<20}\n")
@@ -287,7 +294,7 @@ def create_summary_table(results):
             f.write(f"{config_name:<30} {train_acc:>18.2f}% {test_acc:>18.2f}%\n")
         f.write("="*80 + "\n")
     
-    print("\nSummary saved to results_summary.txt")
+    print(f"\nSummary saved to {RESULTS_FILE}")
 
 
 def main():
