@@ -1,5 +1,4 @@
 materials/
-*.txt
 *.odt
 __pycache__
 .idea
