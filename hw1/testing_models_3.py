@@ -25,7 +25,7 @@ def test_all_models():
         print(f"{'=' * 70}")
 
         for model_type in ['best', 'final']:
-            file_path = f'models/{config_name}_{model_type}.pth'
+            file_path = f'hw1/models/{config_name}_{model_type}.pth'
 
             try:
                 # Create model

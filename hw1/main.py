@@ -21,9 +21,9 @@ DROPOUT_RATE = 0.5
 WEIGHT_DECAY = 1e-4
 
 # Create directories
-os.makedirs('models', exist_ok=True)
-os.makedirs('plots', exist_ok=True)
-os.makedirs('data', exist_ok=True)
+os.makedirs('hw1/models', exist_ok=True)
+os.makedirs('hw1/plots', exist_ok=True)
+os.makedirs('hw1/data', exist_ok=True)
 
 
 class LeNet5(nn.Module):
